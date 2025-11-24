@@ -4,69 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UKMR to Dot</title>
+    <!-- Material Icons & Roboto Font -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
+    
     <style>
-        /* --- Material Design 2 Variables & Reset --- */
         :root {
-            --md-sys-color-primary: #6200EE;
-            --md-sys-color-primary-variant: #3700B3;
-            --md-sys-color-secondary: #03DAC6;
-            --md-sys-color-surface: #FFFFFF;
-            --md-sys-color-background: #F5F5F5;
-            --md-sys-color-on-primary: #FFFFFF;
-            --md-sys-color-on-surface: #000000;
+            /* Material Design 2 Color Palette */
+            --md-primary: #6200EE;
+            --md-primary-variant: #3700B3;
+            --md-secondary: #03DAC6;
+            --md-background: #F5F5F5;
+            --md-surface: #FFFFFF;
+            --md-error: #B00020;
+            --md-on-primary: #FFFFFF;
+            --md-on-secondary: #000000;
+            --md-on-surface: #000000;
+            
+            /* Elevation Shadows */
             --elevation-2: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
             --elevation-4: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            --elevation-8: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
         }
 
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: var(--md-sys-color-background);
-            color: rgba(0, 0, 0, 0.87);
+            background-color: var(--md-background);
+            color: var(--md-on-surface);
+            margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        /* --- App Bar --- */
-        header {
-            background-color: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
+        /* App Bar */
+        .app-bar {
+            background-color: var(--md-primary);
+            color: var(--md-on-primary);
             height: 64px;
             display: flex;
             align-items: center;
             padding: 0 16px;
-            box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+            box-shadow: var(--elevation-4);
+            position: fixed;
+            top: 0;
+            width: 100%;
             z-index: 10;
+            box-sizing: border-box;
         }
 
-        header h1 {
+        .app-bar h1 {
             font-size: 20px;
             font-weight: 500;
+            margin: 0;
             letter-spacing: 0.15px;
         }
 
-        /* --- Main Content --- */
+        /* Main Content */
         main {
-            flex: 1;
+            margin-top: 80px; /* App Bar Height + spacing */
+            padding: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 24px;
+            flex: 1;
         }
 
-        /* --- Card Component --- */
+        /* Card Component */
         .card {
-            background-color: var(--md-sys-color-surface);
+            background-color: var(--md-surface);
             border-radius: 4px;
             box-shadow: var(--elevation-2);
             padding: 24px;
@@ -75,29 +82,32 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center;
+            margin-bottom: 24px;
+            box-sizing: border-box;
         }
 
         .card-title {
             font-size: 20px;
             font-weight: 500;
-            margin-bottom: 8px;
             align-self: flex-start;
-            color: rgba(0,0,0,0.87);
+            margin-bottom: 16px;
+            color: rgba(0, 0, 0, 0.87);
         }
 
         .card-subtitle {
             font-size: 14px;
-            color: rgba(0,0,0,0.6);
-            margin-bottom: 24px;
+            color: rgba(0, 0, 0, 0.6);
             align-self: flex-start;
+            margin-bottom: 24px;
+            line-height: 1.5;
         }
 
-        /* --- Preview Area --- */
-        .preview-container {
+        /* Canvas Container & Checkerboard Background for Transparency */
+        .canvas-container {
             width: 100%;
-            height: 300px;
-            background-color: #eee;
+            max-width: 300px; /* Display size */
+            aspect-ratio: 40 / 48;
+            background-color: #fff;
             background-image: 
                 linear-gradient(45deg, #ccc 25%, transparent 25%), 
                 linear-gradient(-45deg, #ccc 25%, transparent 25%), 
@@ -105,47 +115,48 @@
                 linear-gradient(-45deg, transparent 75%, #ccc 75%);
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-            border-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.12);
             margin-bottom: 24px;
             display: flex;
-            align-items: center;
             justify-content: center;
-            border: 1px solid rgba(0,0,0,0.12);
+            align-items: center;
             overflow: hidden;
             position: relative;
         }
 
-        canvas#previewCanvas {
-            /* CSSで見た目だけ大きく表示（補間なし） */
-            width: auto;
+        canvas {
+            width: 100%;
             height: 100%;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: -webkit-crisp-edges;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-            display: none; /* 初期は非表示 */
+            image-rendering: pixelated; /* Essential for dot look */
+            display: block;
         }
-        
-        .placeholder-text {
+
+        .empty-state {
             color: rgba(0,0,0,0.38);
-            font-size: 14px;
-            position: absolute;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            position: absolute;
+            inset: 0;
             pointer-events: none;
         }
-
-        /* --- Buttons (Material Buttons) --- */
-        .btn-group {
-            display: flex;
-            gap: 16px;
-            width: 100%;
-            justify-content: flex-end;
-            margin-top: 8px;
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 8px;
         }
 
-        .btn {
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .mdc-button {
             height: 36px;
             padding: 0 16px;
             border-radius: 4px;
@@ -154,184 +165,221 @@
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 1.25px;
-            border: none;
             cursor: pointer;
+            border: none;
+            outline: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: box-shadow 0.2s, background-color 0.2s;
-            outline: none;
+            transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-outlined {
-            background-color: transparent;
-            border: 1px solid rgba(0,0,0,0.12);
-            color: var(--md-sys-color-primary);
-        }
-        
-        .btn-outlined:hover {
-            background-color: rgba(98, 0, 238, 0.04);
-            border: 1px solid var(--md-sys-color-primary);
-        }
-
-        .btn-contained {
-            background-color: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-            box-shadow: var(--elevation-2);
-        }
-
-        .btn-contained:hover {
-            background-color: var(--md-sys-color-primary-variant);
-            box-shadow: var(--elevation-4);
-        }
-
-        .btn-contained:disabled {
-            background-color: rgba(0,0,0,0.12);
-            color: rgba(0,0,0,0.38);
-            box-shadow: none;
-            cursor: default;
-        }
-        
-        .btn-icon {
+        .mdc-button i {
             margin-right: 8px;
             font-size: 18px;
         }
 
-        input[type="file"] {
+        /* Contained Button (Primary) */
+        .mdc-button.contained {
+            background-color: var(--md-primary);
+            color: var(--md-on-primary);
+            box-shadow: var(--elevation-2);
+        }
+
+        .mdc-button.contained:hover {
+            box-shadow: var(--elevation-4);
+            background-color: rgb(88, 0, 219); /* Darken slightly */
+        }
+        
+        .mdc-button.contained:active {
+            box-shadow: var(--elevation-8);
+        }
+
+        /* Outlined Button */
+        .mdc-button.outlined {
+            background-color: transparent;
+            color: var(--md-primary);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+        }
+
+        .mdc-button.outlined:hover {
+            background-color: rgba(98, 0, 238, 0.04);
+            border-color: var(--md-primary);
+        }
+
+        .file-input {
             display: none;
         }
 
-        /* --- Footer --- */
-        footer {
+        /* Snack Bar (Notification) */
+        #snackbar {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
             text-align: center;
+            border-radius: 4px;
             padding: 16px;
-            font-size: 12px;
-            color: rgba(0,0,0,0.6);
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+            box-shadow: var(--elevation-4);
+        }
+
+        #snackbar.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
         }
 
     </style>
 </head>
 <body>
 
-    <header>
+    <!-- App Bar -->
+    <header class="app-bar">
         <h1>UKMR to Dot</h1>
     </header>
 
     <main>
         <div class="card">
-            <div class="card-title">画像変換</div>
-            <div class="card-subtitle">40x48pxのPNG画像をアップロードして高解像度ドット絵に変換します。</div>
-
-            <div class="preview-container" id="dropZone">
-                <div class="placeholder-text" id="placeholder">
-                    <span class="material-icons" style="font-size: 48px; margin-bottom: 8px;">image</span>
-                    画像をここにドラッグ&ドロップ<br>または「画像を選択」
-                </div>
-                <canvas id="previewCanvas" width="40" height="48"></canvas>
+            <div class="card-title">画像の変換</div>
+            <div class="card-subtitle">
+                画像を読み込むと自動的に40x48ピクセルにリサイズされ、ドット絵に変換されます。
+                <br>エクスポートは高解像度（400x480px）の透過PNGです。
             </div>
 
-            <input type="file" id="fileInput" accept="image/png, image/jpeg">
+            <!-- Preview Area -->
+            <div class="canvas-container" id="canvasWrapper">
+                <div class="empty-state" id="emptyState">
+                    <span class="material-icons">image</span>
+                    <span>No Image Loaded</span>
+                </div>
+                <canvas id="displayCanvas" width="400" height="480"></canvas>
+            </div>
 
-            <div class="btn-group">
-                <button class="btn btn-outlined" onclick="document.getElementById('fileInput').click()">
-                    <span class="material-icons btn-icon">folder_open</span>
-                    画像を選択
+            <!-- Controls -->
+            <div class="button-group">
+                <input type="file" id="fileInput" class="file-input" accept="image/png, image/jpeg, image/webp">
+                
+                <button class="mdc-button outlined" onclick="document.getElementById('fileInput').click()">
+                    <i class="material-icons">upload</i>
+                    画像を読み込む
                 </button>
-                <button class="btn btn-contained" id="exportBtn" disabled>
-                    <span class="material-icons btn-icon">save_alt</span>
-                    エクスポート
+
+                <button class="mdc-button contained" id="exportBtn" disabled onclick="downloadImage()">
+                    <i class="material-icons">save_alt</i>
+                    書き出し
                 </button>
             </div>
         </div>
     </main>
-    
-    <canvas id="exportCanvas" width="400" height="480" style="display: none;"></canvas>
 
-    <footer>
-        &copy; 2025 UKMR to Dot Converter
-    </footer>
+    <div id="snackbar">画像を保存しました</div>
+
+    <!-- Hidden Processing Canvas (40x48) -->
+    <canvas id="processCanvas" width="40" height="48" style="display: none;"></canvas>
 
     <script>
         const fileInput = document.getElementById('fileInput');
-        const previewCanvas = document.getElementById('previewCanvas');
-        const ctx = previewCanvas.getContext('2d');
-        const exportCanvas = document.getElementById('exportCanvas');
-        const exportCtx = exportCanvas.getContext('2d');
+        const processCanvas = document.getElementById('processCanvas');
+        const displayCanvas = document.getElementById('displayCanvas');
         const exportBtn = document.getElementById('exportBtn');
-        const placeholder = document.getElementById('placeholder');
-        const dropZone = document.getElementById('dropZone');
+        const emptyState = document.getElementById('emptyState');
+        const processCtx = processCanvas.getContext('2d', { willReadFrequently: true });
+        const displayCtx = displayCanvas.getContext('2d');
 
-        // 画像処理設定
-        ctx.imageSmoothingEnabled = false;
-        exportCtx.imageSmoothingEnabled = false; // ここが重要：ドットを鮮明に保つ
+        // Initial setup
+        displayCtx.imageSmoothingEnabled = false;
 
-        // ファイル選択時のイベント
-        fileInput.addEventListener('change', handleFiles);
-        
-        // ドラッグ＆ドロップ対応
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.backgroundColor = 'rgba(98, 0, 238, 0.05)';
-        });
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropZone.style.backgroundColor = '';
-        });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.style.backgroundColor = '';
-            if (e.dataTransfer.files.length > 0) {
-                processImage(e.dataTransfer.files[0]);
-            }
-        });
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        function handleFiles(e) {
-            if (e.target.files.length > 0) {
-                processImage(e.target.files[0]);
-            }
-        }
-
-        function processImage(file) {
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = (event) => {
                 const img = new Image();
-                img.onload = function() {
-                    // キャンバスをクリア
-                    ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-                    exportCtx.clearRect(0, 0, exportCanvas.width, exportCanvas.height);
-
-                    // プレビュー描画 (40x48)
-                    // CSSで拡大表示されるが、データ自体は原寸
-                    ctx.drawImage(img, 0, 0, 40, 48);
-                    
-                    // エクスポート用描画 (400x480) - 10倍スケール
-                    // imageSmoothingEnabled = false によりニアレストネイバー法で拡大される
-                    exportCtx.drawImage(img, 0, 0, 400, 480);
-
-                    // UI更新
-                    previewCanvas.style.display = 'block';
-                    placeholder.style.display = 'none';
-                    exportBtn.disabled = false;
-                }
+                img.onload = () => {
+                    processImage(img);
+                };
                 img.src = event.target.result;
-            }
+            };
             reader.readAsDataURL(file);
+        });
+
+        function processImage(img) {
+            // 1. Clear canvases
+            processCtx.clearRect(0, 0, 40, 48);
+            displayCtx.clearRect(0, 0, 400, 480);
+
+            // 2. Draw resized image to small canvas (40x48)
+            // This forces the "pixelation" logic by squashing it down
+            processCtx.drawImage(img, 0, 0, 40, 48);
+
+            // 3. Get pixel data
+            const imageData = processCtx.getImageData(0, 0, 40, 48);
+            const data = imageData.data;
+
+            // 4. Draw Scaled Dots to the Display Canvas (400x480)
+            // We draw rectangles manually to ensure sharp edges and transparency handling
+            const scale = 10;
+            
+            for (let y = 0; y < 48; y++) {
+                for (let x = 0; x < 40; x++) {
+                    const index = (y * 40 + x) * 4;
+                    const r = data[index];
+                    const g = data[index + 1];
+                    const b = data[index + 2];
+                    const a = data[index + 3]; // Alpha
+
+                    if (a > 0) {
+                        // Normalize alpha for fillStyle (0-1)
+                        const alpha = a / 255;
+                        displayCtx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+                        // Draw a 10x10 rect
+                        displayCtx.fillRect(x * scale, y * scale, scale, scale);
+                    }
+                }
+            }
+
+            // UI Updates
+            emptyState.style.display = 'none';
+            exportBtn.removeAttribute('disabled');
         }
 
-        // エクスポートボタンの処理
-        exportBtn.addEventListener('click', () => {
-            // 透過PNGとしてデータを取得
-            const dataURL = exportCanvas.toDataURL('image/png');
+        function downloadImage() {
+            // Use the Display Canvas (which is already 400x480 and clean dots) for export
+            const dataUrl = displayCanvas.toDataURL("image/png");
             
-            // ダウンロードリンク生成
             const link = document.createElement('a');
-            link.download = 'ukmr_dot_export.png';
-            link.href = dataURL;
+            link.download = 'ukmr_dot_400x480.png';
+            link.href = dataUrl;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        });
 
+            showToast();
+        }
+
+        function showToast() {
+            const x = document.getElementById("snackbar");
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        }
     </script>
 </body>
 </html>
