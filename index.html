@@ -3,28 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UKMR to Dot</title>
+    <title>UKMR to Dot - 40x48 Pixel Art Converter</title>
     <!-- Material Icons & Roboto Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
     <style>
         :root {
             /* Material Design 2 Color Palette */
-            --md-primary: #6200EE;
-            --md-primary-variant: #3700B3;
-            --md-secondary: #03DAC6;
-            --md-background: #F5F5F5;
+            --md-primary: #3F51B5; /* Indigo 500 */
+            --md-primary-dark: #303F9F;
+            --md-secondary: #E91E63; /* Pink 500 */
+            --md-background: #FAFAFA;
             --md-surface: #FFFFFF;
-            --md-error: #B00020;
             --md-on-primary: #FFFFFF;
-            --md-on-secondary: #000000;
-            --md-on-surface: #000000;
+            --md-on-secondary: #FFFFFF;
+            --md-on-surface: rgba(0, 0, 0, 0.87);
             
-            /* Elevation Shadows */
-            --elevation-2: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
-            --elevation-4: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
-            --elevation-8: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
+            /* Shadows */
+            --shadow-2: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
+            --shadow-4: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
         }
 
         body {
@@ -32,7 +30,6 @@
             background-color: var(--md-background);
             color: var(--md-on-surface);
             margin: 0;
-            padding: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -45,13 +42,11 @@
             height: 64px;
             display: flex;
             align-items: center;
-            padding: 0 16px;
-            box-shadow: var(--elevation-4);
-            position: fixed;
+            padding: 0 24px;
+            box-shadow: var(--shadow-4);
+            position: sticky;
             top: 0;
-            width: 100%;
-            z-index: 10;
-            box-sizing: border-box;
+            z-index: 100;
         }
 
         .app-bar h1 {
@@ -61,237 +56,250 @@
             letter-spacing: 0.15px;
         }
 
-        /* Main Content */
+        /* Main Layout */
         main {
-            margin-top: 80px; /* App Bar Height + spacing */
-            padding: 16px;
+            flex: 1;
+            padding: 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            flex: 1;
+            gap: 24px;
         }
 
-        /* Card Component */
+        /* Card */
         .card {
-            background-color: var(--md-surface);
+            background: var(--md-surface);
             border-radius: 4px;
-            box-shadow: var(--elevation-2);
+            box-shadow: var(--shadow-2);
             padding: 24px;
             width: 100%;
-            max-width: 480px;
+            max-width: 500px;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+
+        .card-header {
+            width: 100%;
             margin-bottom: 24px;
-            box-sizing: border-box;
         }
 
         .card-title {
             font-size: 20px;
             font-weight: 500;
-            align-self: flex-start;
-            margin-bottom: 16px;
-            color: rgba(0, 0, 0, 0.87);
+            margin: 0 0 8px 0;
         }
 
         .card-subtitle {
             font-size: 14px;
-            color: rgba(0, 0, 0, 0.6);
-            align-self: flex-start;
-            margin-bottom: 24px;
+            color: rgba(0,0,0,0.6);
+            margin: 0;
             line-height: 1.5;
         }
 
-        /* Canvas Container & Checkerboard Background for Transparency */
-        .canvas-container {
-            width: 100%;
-            max-width: 300px; /* Display size */
-            aspect-ratio: 40 / 48;
+        /* Canvas Wrapper */
+        .preview-container {
+            position: relative;
+            margin-bottom: 24px;
+            padding: 8px;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 4px;
             background-color: #fff;
+            
+            /* Checkerboard pattern for transparency */
             background-image: 
-                linear-gradient(45deg, #ccc 25%, transparent 25%), 
-                linear-gradient(-45deg, #ccc 25%, transparent 25%), 
-                linear-gradient(45deg, transparent 75%, #ccc 75%), 
-                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+                linear-gradient(45deg, #eee 25%, transparent 25%), 
+                linear-gradient(-45deg, #eee 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #eee 75%), 
+                linear-gradient(-45deg, transparent 75%, #eee 75%);
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-            border: 1px solid rgba(0,0,0,0.12);
-            margin-bottom: 24px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
         }
 
         canvas {
-            width: 100%;
-            height: 100%;
-            image-rendering: pixelated; /* Essential for dot look */
             display: block;
+            width: 100%;
+            max-width: 300px; /* 表示サイズは適度に抑える */
+            height: auto;
+            image-rendering: pixelated; /* プレビューでのボケ防止 */
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
         }
 
-        .empty-state {
+        .placeholder-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             color: rgba(0,0,0,0.38);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            position: absolute;
-            inset: 0;
             pointer-events: none;
-        }
-        
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 8px;
-        }
-
-        /* Buttons */
-        .button-group {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            justify-content: center;
             width: 100%;
         }
 
-        .mdc-button {
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* Material Buttons */
+        .btn {
             height: 36px;
             padding: 0 16px;
             border-radius: 4px;
-            font-family: 'Roboto', sans-serif;
+            border: none;
+            font-family: inherit;
             font-size: 14px;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 1.25px;
             cursor: pointer;
-            border: none;
-            outline: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            outline: none;
             position: relative;
             overflow: hidden;
         }
 
-        .mdc-button i {
-            margin-right: 8px;
+        .btn i {
             font-size: 18px;
+            margin-right: 8px;
         }
 
-        /* Contained Button (Primary) */
-        .mdc-button.contained {
-            background-color: var(--md-primary);
-            color: var(--md-on-primary);
-            box-shadow: var(--elevation-2);
-        }
-
-        .mdc-button.contained:hover {
-            box-shadow: var(--elevation-4);
-            background-color: rgb(88, 0, 219); /* Darken slightly */
-        }
-        
-        .mdc-button.contained:active {
-            box-shadow: var(--elevation-8);
-        }
-
-        /* Outlined Button */
-        .mdc-button.outlined {
-            background-color: transparent;
+        .btn-outlined {
+            background: transparent;
             color: var(--md-primary);
-            border: 1px solid rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0,0,0,0.12);
         }
 
-        .mdc-button.outlined:hover {
-            background-color: rgba(98, 0, 238, 0.04);
+        .btn-outlined:hover {
+            background-color: rgba(63, 81, 181, 0.04);
             border-color: var(--md-primary);
         }
 
-        .file-input {
-            display: none;
+        .btn-contained {
+            background: var(--md-secondary);
+            color: var(--md-on-secondary);
+            box-shadow: var(--shadow-2);
         }
 
-        /* Snack Bar (Notification) */
+        .btn-contained:hover {
+            background-color: #D81B60;
+            box-shadow: var(--shadow-4);
+        }
+
+        .btn-contained:disabled {
+            background-color: rgba(0,0,0,0.12);
+            color: rgba(0,0,0,0.38);
+            box-shadow: none;
+            cursor: default;
+        }
+
+        /* Chip/Badge for info */
+        .info-chip {
+            background: rgba(0,0,0,0.08);
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            color: rgba(0,0,0,0.6);
+            margin-bottom: 16px;
+            display: none; /* JSで表示制御 */
+        }
+
+        /* Snackbar */
         #snackbar {
             visibility: hidden;
             min-width: 250px;
-            background-color: #333;
+            background-color: #323232;
             color: #fff;
-            text-align: center;
+            text-align: left;
             border-radius: 4px;
-            padding: 16px;
+            padding: 14px 24px;
             position: fixed;
-            z-index: 100;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
+            z-index: 1000;
+            left: 24px;
+            bottom: 24px;
             font-size: 14px;
-            box-shadow: var(--elevation-4);
+            box-shadow: var(--shadow-4);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         #snackbar.show {
             visibility: visible;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: slideUp 0.3s ease-out;
         }
 
-        @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
+        input[type="file"] {
+            display: none;
         }
-
     </style>
 </head>
 <body>
 
-    <!-- App Bar -->
     <header class="app-bar">
         <h1>UKMR to Dot</h1>
     </header>
 
     <main>
         <div class="card">
-            <div class="card-title">画像の変換</div>
-            <div class="card-subtitle">
-                画像を読み込むと自動的に40x48ピクセルにリサイズされ、ドット絵に変換されます。
-                <br>エクスポートは高解像度（400x480px）の透過PNGです。
+            <div class="card-header">
+                <h2 class="card-title">画像の変換</h2>
+                <p class="card-subtitle">
+                    40x48ピクセルのドット絵に変換します。<br>
+                    出力画像サイズは <strong>400x480px</strong> (1ドット=10px) です。
+                </p>
             </div>
 
-            <!-- Preview Area -->
-            <div class="canvas-container" id="canvasWrapper">
-                <div class="empty-state" id="emptyState">
-                    <span class="material-icons">image</span>
-                    <span>No Image Loaded</span>
-                </div>
+            <div class="info-chip" id="resolutionInfo">
+                Grid: 40x48 | Output: 400x480px
+            </div>
+
+            <!-- 表示用キャンバス (実際には400x480で描画される) -->
+            <div class="preview-container">
                 <canvas id="displayCanvas" width="400" height="480"></canvas>
+                <div class="placeholder-text" id="placeholder">
+                    <span class="material-icons" style="font-size: 48px; margin-bottom: 8px; color: rgba(0,0,0,0.2);">image</span>
+                    <span>No Image</span>
+                </div>
             </div>
 
-            <!-- Controls -->
-            <div class="button-group">
-                <input type="file" id="fileInput" class="file-input" accept="image/png, image/jpeg, image/webp">
+            <div class="controls">
+                <input type="file" id="fileInput" accept="image/*">
                 
-                <button class="mdc-button outlined" onclick="document.getElementById('fileInput').click()">
-                    <i class="material-icons">upload</i>
-                    画像を読み込む
+                <button class="btn btn-outlined" onclick="document.getElementById('fileInput').click()">
+                    <i class="material-icons">add_photo_alternate</i>
+                    画像を選択
                 </button>
 
-                <button class="mdc-button contained" id="exportBtn" disabled onclick="downloadImage()">
+                <button class="btn btn-contained" id="exportBtn" disabled onclick="downloadImage()">
                     <i class="material-icons">save_alt</i>
-                    書き出し
+                    保存 (PNG)
                 </button>
             </div>
         </div>
     </main>
 
-    <div id="snackbar">画像を保存しました</div>
+    <div id="snackbar">
+        <span id="snackbarMsg">画像を保存しました</span>
+    </div>
 
-    <!-- Hidden Processing Canvas (40x48) -->
+    <!-- 処理用・隠しキャンバス (40x48) -->
     <canvas id="processCanvas" width="40" height="48" style="display: none;"></canvas>
 
     <script>
@@ -299,11 +307,15 @@
         const processCanvas = document.getElementById('processCanvas');
         const displayCanvas = document.getElementById('displayCanvas');
         const exportBtn = document.getElementById('exportBtn');
-        const emptyState = document.getElementById('emptyState');
+        const placeholder = document.getElementById('placeholder');
+        const resolutionInfo = document.getElementById('resolutionInfo');
+
+        // コンテキスト取得 (ピクセル操作用)
         const processCtx = processCanvas.getContext('2d', { willReadFrequently: true });
         const displayCtx = displayCanvas.getContext('2d');
 
-        // Initial setup
+        // ピクセルのボケを防ぐ設定
+        processCtx.imageSmoothingEnabled = false;
         displayCtx.imageSmoothingEnabled = false;
 
         fileInput.addEventListener('change', (e) => {
@@ -314,71 +326,83 @@
             reader.onload = (event) => {
                 const img = new Image();
                 img.onload = () => {
-                    processImage(img);
+                    convertImage(img);
                 };
                 img.src = event.target.result;
             };
             reader.readAsDataURL(file);
         });
 
-        function processImage(img) {
-            // 1. Clear canvases
+        function convertImage(img) {
+            // 1. 小さいキャンバス(40x48)をクリアして画像を縮小描画
+            // これにより強制的に40x48の情報量に落とす
             processCtx.clearRect(0, 0, 40, 48);
-            displayCtx.clearRect(0, 0, 400, 480);
-
-            // 2. Draw resized image to small canvas (40x48)
-            // This forces the "pixelation" logic by squashing it down
             processCtx.drawImage(img, 0, 0, 40, 48);
 
-            // 3. Get pixel data
+            // 2. 縮小した画像のピクセルデータを取得
             const imageData = processCtx.getImageData(0, 0, 40, 48);
             const data = imageData.data;
 
-            // 4. Draw Scaled Dots to the Display Canvas (400x480)
-            // We draw rectangles manually to ensure sharp edges and transparency handling
-            const scale = 10;
-            
+            // 3. 大きいキャンバス(400x480)をクリア
+            displayCtx.clearRect(0, 0, 400, 480);
+
+            // 4. ピクセルデータを元に、10x10の矩形(ドット)を描画
+            const dotSize = 10; // 1ドットのピクセルサイズ
+
             for (let y = 0; y < 48; y++) {
                 for (let x = 0; x < 40; x++) {
                     const index = (y * 40 + x) * 4;
+                    
                     const r = data[index];
                     const g = data[index + 1];
                     const b = data[index + 2];
-                    const a = data[index + 3]; // Alpha
+                    const a = data[index + 3];
 
+                    // 透明度がある場合のみ描画
                     if (a > 0) {
-                        // Normalize alpha for fillStyle (0-1)
-                        const alpha = a / 255;
-                        displayCtx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
-                        // Draw a 10x10 rect
-                        displayCtx.fillRect(x * scale, y * scale, scale, scale);
+                        displayCtx.fillStyle = `rgba(${r},${g},${b},${a / 255})`;
+                        // 座標を10倍して、10x10の正方形を描く
+                        displayCtx.fillRect(x * dotSize, y * dotSize, dotSize, dotSize);
                     }
                 }
             }
 
-            // UI Updates
-            emptyState.style.display = 'none';
-            exportBtn.removeAttribute('disabled');
+            // UI更新
+            placeholder.style.display = 'none';
+            resolutionInfo.style.display = 'block';
+            exportBtn.disabled = false;
+            
+            showSnackbar("変換完了: 40x48ドット (400x480px)");
         }
 
         function downloadImage() {
-            // Use the Display Canvas (which is already 400x480 and clean dots) for export
+            // 表示用キャンバスは既に400x480pxの高解像度ドット絵になっている
             const dataUrl = displayCanvas.toDataURL("image/png");
             
+            // 現在時刻でファイル名生成
+            const now = new Date();
+            const timeStr = now.toISOString().slice(0,19).replace(/[-T:]/g,"");
+            const filename = `ukmr_dot_${timeStr}.png`;
+
             const link = document.createElement('a');
-            link.download = 'ukmr_dot_400x480.png';
+            link.download = filename;
             link.href = dataUrl;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            showToast();
+            showSnackbar("画像をダウンロードしました");
         }
 
-        function showToast() {
-            const x = document.getElementById("snackbar");
-            x.className = "show";
-            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        function showSnackbar(msg) {
+            const sb = document.getElementById("snackbar");
+            const sbMsg = document.getElementById("snackbarMsg");
+            sbMsg.textContent = msg;
+            
+            sb.className = "show";
+            
+            // 既存のタイマーがあればリセットすべきだが簡易実装として
+            setTimeout(() => { sb.className = sb.className.replace("show", ""); }, 3000);
         }
     </script>
 </body>
