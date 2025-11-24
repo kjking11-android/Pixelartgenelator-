@@ -1,373 +1,337 @@
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  // Tailwindの設定をカスタマイズ（Material Blue V2風）
-  // Material Designの青 (Blue 700: #1976D2, Blue 800: #1565C0, Blue A200: #448AFF)を模倣
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          'material-primary': '#1976D2', 
-          'material-dark': '#1565C0',    
-          'material-accent': '#448AFF',   
-        },
-        fontFamily: {
-          // UIを読みやすくするため、Interフォントを使用
-          sans: ['Inter', 'sans-serif'],
-        },
-      },
-    }
-  }
-</script>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UKMR to Dot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-<title>UKMR to Dot - 40x48 ピクセルコンバーター</title>
+    <style>
+        /* --- Material Design 2 Variables & Reset --- */
+        :root {
+            --md-sys-color-primary: #6200EE;
+            --md-sys-color-primary-variant: #3700B3;
+            --md-sys-color-secondary: #03DAC6;
+            --md-sys-color-surface: #FFFFFF;
+            --md-sys-color-background: #F5F5F5;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-on-surface: #000000;
+            --elevation-2: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
+            --elevation-4: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+        }
 
-<style>
-  /* Interフォントを適用 */
-  body {
-    font-family: 'Inter', sans-serif;
-  }
-  /* ドット絵のグリッドコンテナのスタイル */
-  #dotArtGrid {
-    display: grid;
-    /* 40x48のグリッドを定義 */
-    grid-template-columns: repeat(40, 1fr);
-    grid-template-rows: repeat(48, 1fr);
-    /* 表示サイズを設定（元の40x48ピクセルを8倍に拡大して320x384ピクセルで表示） */
-    width: 320px; 
-    height: 384px;
-    max-width: 90vw; /* モバイル対応: ビューポート幅の90% */
-    max-height: calc(90vw * 48 / 40); /* アスペクト比 (40:48) を維持 */
-    border: 1px solid #ccc;
-    background-color: #ffffff;
-    /* 透過の確認を容易にするため、背景にチェック柄を表示（エクスポート画像には影響しない） */
-    background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%);
-    background-size: 16px 16px;
-    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
-  }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-  /* グリッド内の各ピクセル要素のスタイル */
-  .pixel {
-    width: 100%;
-    height: 100%;
-    /* ピクセル感を強調するために、ドット間のわずかな境界線や丸みは設けていません */
-  }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-background);
+            color: rgba(0, 0, 0, 0.87);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-  /* 隠しCanvasのサイズを設定 */
-  .hidden-canvas {
-    display: none; /* 画面には表示しない */
-  }
-</style>
+        /* --- App Bar --- */
+        header {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+            z-index: 10;
+        }
 
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+        header h1 {
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: 0.15px;
+        }
 
-  <div class="w-full max-w-xl bg-white rounded-xl shadow-2xl overflow-hidden">
-    <!-- ヘッダー (Material Primary Blue) -->
-    <header class="bg-material-primary text-white p-4 shadow-xl flex justify-between items-center">
-      <h1 class="text-2xl font-extrabold tracking-wide">UKMR to Dot</h1>
-      <span class="text-xs opacity-80 border border-white/50 px-2 py-0.5 rounded-full">40x48 Pixel Converter</span>
+        /* --- Main Content --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        /* --- Card Component --- */
+        .card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 4px;
+            box-shadow: var(--elevation-2);
+            padding: 24px;
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            align-self: flex-start;
+            color: rgba(0,0,0,0.87);
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: rgba(0,0,0,0.6);
+            margin-bottom: 24px;
+            align-self: flex-start;
+        }
+
+        /* --- Preview Area --- */
+        .preview-container {
+            width: 100%;
+            height: 300px;
+            background-color: #eee;
+            background-image: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(-45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #ccc 75%), 
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(0,0,0,0.12);
+            overflow: hidden;
+            position: relative;
+        }
+
+        canvas#previewCanvas {
+            /* CSSで見た目だけ大きく表示（補間なし） */
+            width: auto;
+            height: 100%;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            display: none; /* 初期は非表示 */
+        }
+        
+        .placeholder-text {
+            color: rgba(0,0,0,0.38);
+            font-size: 14px;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        /* --- Buttons (Material Buttons) --- */
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        .btn {
+            height: 36px;
+            padding: 0 16px;
+            border-radius: 4px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1.25px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: box-shadow 0.2s, background-color 0.2s;
+            outline: none;
+        }
+
+        .btn-outlined {
+            background-color: transparent;
+            border: 1px solid rgba(0,0,0,0.12);
+            color: var(--md-sys-color-primary);
+        }
+        
+        .btn-outlined:hover {
+            background-color: rgba(98, 0, 238, 0.04);
+            border: 1px solid var(--md-sys-color-primary);
+        }
+
+        .btn-contained {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            box-shadow: var(--elevation-2);
+        }
+
+        .btn-contained:hover {
+            background-color: var(--md-sys-color-primary-variant);
+            box-shadow: var(--elevation-4);
+        }
+
+        .btn-contained:disabled {
+            background-color: rgba(0,0,0,0.12);
+            color: rgba(0,0,0,0.38);
+            box-shadow: none;
+            cursor: default;
+        }
+        
+        .btn-icon {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 12px;
+            color: rgba(0,0,0,0.6);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>UKMR to Dot</h1>
     </header>
 
-    <!-- メインコンテンツ -->
-    <main class="p-6 space-y-6">
+    <main>
+        <div class="card">
+            <div class="card-title">画像変換</div>
+            <div class="card-subtitle">40x48pxのPNG画像をアップロードして高解像度ドット絵に変換します。</div>
 
-      <!-- ファイルアップロードセクション -->
-      <section class="border-b pb-4 border-gray-200">
-        <label for="imageUpload" class="block text-lg text-gray-800 font-semibold mb-3">
-          1. 40x48px PNG画像をアップロード
-        </label>
-        <input type="file" id="imageUpload" accept="image/png" class="block w-full text-sm text-gray-700
-          file:mr-4 file:py-2 file:px-4
-          file:rounded-full file:border-0
-          file:text-sm file:font-bold
-          file:bg-material-accent file:text-white
-          hover:file:bg-material-dark cursor-pointer transition duration-200 ease-in-out shadow-md"
-          onchange="handleImageUpload(event)">
-      </section>
-
-      <!-- プレビューと結果表示セクション -->
-      <section class="space-y-4">
-        <h2 class="text-xl font-bold text-gray-800 border-b pb-2 border-material-accent/50">2. 変換結果の表示とエクスポート</h2>
-
-        <div class="flex flex-col md:flex-row gap-8 justify-between items-start">
-
-          <!-- 元画像プレビュー -->
-          <div class="w-full md:w-1/2 p-4 border border-gray-300 rounded-lg shadow-md bg-white flex flex-col items-center">
-            <h3 class="text-sm font-medium mb-3 text-gray-600">元画像プレビュー (推奨: 40x48px)</h3>
-            <img id="originalPreview" 
-                 src="https://placehold.co/80x96/E0E0E0/1976D2?text=Upload+PNG" 
-                 alt="元の画像プレビュー"
-                 class="w-20 h-24 object-contain rounded-md shadow-lg transition duration-300 border-2 border-material-primary/50">
-            <p class="text-xs text-gray-500 mt-2">（自動で40x48に縮小されます）</p>
-          </div>
-
-          <!-- ドット絵結果 -->
-          <div class="w-full md:w-1/2 p-4 border border-gray-300 rounded-lg shadow-md bg-white flex flex-col items-center">
-            <h3 class="text-sm font-medium mb-3 text-gray-600">ドット絵 (40x48 ピクセル)</h3>
-            <div id="dotArtContainer" class="flex justify-center items-center mb-4">
-              <div id="dotArtGrid">
-                <!-- ドット要素がここに挿入されます -->
-              </div>
+            <div class="preview-container" id="dropZone">
+                <div class="placeholder-text" id="placeholder">
+                    <span class="material-icons" style="font-size: 48px; margin-bottom: 8px;">image</span>
+                    画像をここにドラッグ&ドロップ<br>または「画像を選択」
+                </div>
+                <canvas id="previewCanvas" width="40" height="48"></canvas>
             </div>
 
-            <!-- エクスポートボタン -->
-            <button id="exportButton" onclick="exportDotArt()" disabled
-              class="w-full py-2 px-4 bg-material-primary text-white font-semibold rounded-full shadow-lg 
-                     hover:bg-material-dark transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2 -mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-              PNGとしてエクスポート (400x480px 透過PNG)
-            </button>
-          </div>
+            <input type="file" id="fileInput" accept="image/png, image/jpeg">
+
+            <div class="btn-group">
+                <button class="btn btn-outlined" onclick="document.getElementById('fileInput').click()">
+                    <span class="material-icons btn-icon">folder_open</span>
+                    画像を選択
+                </button>
+                <button class="btn btn-contained" id="exportBtn" disabled>
+                    <span class="material-icons btn-icon">save_alt</span>
+                    エクスポート
+                </button>
+            </div>
         </div>
-      </section>
-
-      <!-- メッセージ表示エリア -->
-      <div id="message" role="alert" class="text-center p-3 rounded-lg font-medium hidden transition duration-300"></div>
-
-      <!-- 隠しCanvas (画像データ取得用) -->
-      <canvas id="hiddenCanvasOriginal" width="40" height="48" class="hidden-canvas"></canvas>
-      <!-- 隠しCanvas (エクスポート用) -->
-      <!-- エクスポートサイズを400x480に設定 -->
-      <canvas id="hiddenCanvasExport" width="400" height="480" class="hidden-canvas"></canvas>
-
     </main>
-
-    <!-- フッター -->
-    <footer class="bg-material-dark text-white text-center p-3 text-sm">
-      <p>&copy; 2025 UKMR to Dot Converter. All rights reserved.</p>
-    </footer>
-  </div>
-
-<script>
-  // 定数
-  const DOT_WIDTH = 40;
-  const DOT_HEIGHT = 48;
-  const EXPORT_SCALE = 10; // 拡大率: 10倍 (40x10=400, 48x10=480)
-  const EXPORT_WIDTH = DOT_WIDTH * EXPORT_SCALE;
-  const EXPORT_HEIGHT = DOT_HEIGHT * EXPORT_SCALE;
-  const FALLBACK_COLOR_DATA = []; // 変換後のピクセル色データを保持する配列 (R, G, B, A)
-
-  // DOM要素の取得
-  const imageUpload = document.getElementById('imageUpload');
-  const originalPreview = document.getElementById('originalPreview');
-  const dotArtGrid = document.getElementById('dotArtGrid');
-  const messageEl = document.getElementById('message');
-  const exportButton = document.getElementById('exportButton');
-
-  // Canvasの取得
-  const hiddenCanvasOriginal = document.getElementById('hiddenCanvasOriginal');
-  const ctxOriginal = hiddenCanvasOriginal.getContext('2d');
-  
-  const hiddenCanvasExport = document.getElementById('hiddenCanvasExport');
-  const ctxExport = hiddenCanvasExport.getContext('2d');
-
-  /**
-   * メッセージ表示関数
-   * @param {string} text 表示するテキスト
-   * @param {string} type メッセージのタイプ ('success', 'error', 'info')
-   */
-  function showMessage(text, type = 'info') {
-    messageEl.textContent = text;
-    // 古いクラスを全て削除し、'hidden'クラスを再適用しない
-    messageEl.className = 'text-center p-3 rounded-lg font-medium transition duration-300';
-
-    // スタイルを設定
-    switch (type) {
-      case 'success':
-        messageEl.classList.add('bg-green-100', 'text-green-800');
-        break;
-      case 'error':
-        messageEl.classList.add('bg-red-100', 'text-red-800');
-        break;
-      case 'info':
-      default:
-        messageEl.classList.add('bg-blue-100', 'text-material-primary');
-        break;
-    }
-
-    messageEl.classList.remove('hidden');
-
-    // 5秒後にメッセージを非表示にする
-    setTimeout(() => {
-      messageEl.classList.add('hidden');
-    }, 5000);
-  }
-
-  /**
-   * ファイルアップロードイベントハンドラ
-   * @param {Event} event
-   */
-  function handleImageUpload(event) {
-    const file = event.target.files[0];
-    if (!file) {
-      return;
-    }
-
-    if (file.type !== 'image/png') {
-      showMessage('エラー: PNGファイルを選択してください。', 'error');
-      imageUpload.value = '';
-      exportButton.disabled = true;
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      originalPreview.src = e.target.result;
-      convertImageToDot(e.target.result);
-    };
-
-    reader.onerror = () => {
-      showMessage('ファイルの読み込み中にエラーが発生しました。', 'error');
-      exportButton.disabled = true;
-    };
-
-    reader.readAsDataURL(file);
-  }
-
-  /**
-   * 画像を読み込み、40x48のドット絵に変換して表示する
-   * @param {string} dataUrl 画像のData URL
-   */
-  function convertImageToDot(dataUrl) {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
     
-    img.onload = () => {
-      // 1. 画像を指定サイズのCanvasに描画してピクセルデータを取得
-      
-      ctxOriginal.clearRect(0, 0, DOT_WIDTH, DOT_HEIGHT);
+    <canvas id="exportCanvas" width="400" height="480" style="display: none;"></canvas>
 
-      // 画像を40x48ピクセルに縮小/拡大して描画
-      ctxOriginal.drawImage(img, 0, 0, DOT_WIDTH, DOT_HEIGHT);
+    <footer>
+        &copy; 2025 UKMR to Dot Converter
+    </footer>
 
-      // ピクセルデータを取得
-      const imageData = ctxOriginal.getImageData(0, 0, DOT_WIDTH, DOT_HEIGHT);
-      const data = imageData.data;
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const ctx = previewCanvas.getContext('2d');
+        const exportCanvas = document.getElementById('exportCanvas');
+        const exportCtx = exportCanvas.getContext('2d');
+        const exportBtn = document.getElementById('exportBtn');
+        const placeholder = document.getElementById('placeholder');
+        const dropZone = document.getElementById('dropZone');
 
-      // ピクセルデータを一時配列に保存 (エクスポート時に利用するため)
-      FALLBACK_COLOR_DATA.length = 0;
-      
-      // 2. ドット絵グリッドの再描画
-      dotArtGrid.innerHTML = '';
+        // 画像処理設定
+        ctx.imageSmoothingEnabled = false;
+        exportCtx.imageSmoothingEnabled = false; // ここが重要：ドットを鮮明に保つ
 
-      // 40x48ピクセルをループ
-      for (let y = 0; y < DOT_HEIGHT; y++) {
-        for (let x = 0; x < DOT_WIDTH; x++) {
-          const index = (y * DOT_WIDTH + x) * 4;
+        // ファイル選択時のイベント
+        fileInput.addEventListener('change', handleFiles);
+        
+        // ドラッグ＆ドロップ対応
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = 'rgba(98, 0, 238, 0.05)';
+        });
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '';
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '';
+            if (e.dataTransfer.files.length > 0) {
+                processImage(e.dataTransfer.files[0]);
+            }
+        });
 
-          const r = data[index];
-          const g = data[index + 1];
-          const b = data[index + 2];
-          const a = data[index + 3];
-
-          // エクスポート用に色データを保存 (R, G, B, A)
-          FALLBACK_COLOR_DATA.push({r, g, b, a});
-
-          // CSSのRGBA形式で色を生成
-          const color = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
-
-          // ドット要素を作成
-          const pixelEl = document.createElement('div');
-          pixelEl.className = 'pixel';
-          pixelEl.style.backgroundColor = color;
-          
-          dotArtGrid.appendChild(pixelEl);
+        function handleFiles(e) {
+            if (e.target.files.length > 0) {
+                processImage(e.target.files[0]);
+            }
         }
-      }
-      
-      showMessage('画像を40x48ピクセルのドット絵に変換しました。エクスポートボタンが有効になりました。', 'success');
-      exportButton.disabled = false;
-      
-      // 元の画像のサイズが40x48でない場合に警告
-      if (img.width !== DOT_WIDTH || img.height !== DOT_HEIGHT) {
-        showMessage(`注意: アップロードされた画像のサイズは ${img.width}x${img.height} です。40x48にリサイズ（縮小または拡大）してピクセル化しました。`, 'info');
-      }
 
-    };
+        function processImage(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // キャンバスをクリア
+                    ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+                    exportCtx.clearRect(0, 0, exportCanvas.width, exportCanvas.height);
 
-    img.onerror = () => {
-      showMessage('画像の読み込み中にエラーが発生しました。ファイルが破損していないか確認してください。', 'error');
-      exportButton.disabled = true;
-    };
+                    // プレビュー描画 (40x48)
+                    // CSSで拡大表示されるが、データ自体は原寸
+                    ctx.drawImage(img, 0, 0, 40, 48);
+                    
+                    // エクスポート用描画 (400x480) - 10倍スケール
+                    // imageSmoothingEnabled = false によりニアレストネイバー法で拡大される
+                    exportCtx.drawImage(img, 0, 0, 400, 480);
 
-    img.src = dataUrl;
-  }
-
-  /**
-   * 変換されたドット絵を400x480の透過PNGとしてエクスポートする
-   */
-  function exportDotArt() {
-    if (FALLBACK_COLOR_DATA.length === 0) {
-      showMessage('エラー: まず画像をアップロードして変換してください。', 'error');
-      return;
-    }
-
-    try {
-      // 1. エクスポート用Canvasをクリア
-      ctxExport.clearRect(0, 0, EXPORT_WIDTH, EXPORT_HEIGHT);
-
-      // 2. 拡大されたピクセルを描画
-      // Canvas APIのfillRectを使用して、1つのドットを10x10ピクセルに拡大して描画する
-      for (let y = 0; y < DOT_HEIGHT; y++) {
-        for (let x = 0; x < DOT_WIDTH; x++) {
-          const i = y * DOT_WIDTH + x;
-          const color = FALLBACK_COLOR_DATA[i];
-
-          // 色を設定 (透過度も考慮)
-          const rgbaColor = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a / 255})`;
-          ctxExport.fillStyle = rgbaColor;
-
-          // 描画位置とサイズを10倍に拡大
-          const drawX = x * EXPORT_SCALE;
-          const drawY = y * EXPORT_SCALE;
-          
-          // 1ピクセルを10x10の四角形として描画
-          ctxExport.fillRect(drawX, drawY, EXPORT_SCALE, EXPORT_SCALE);
+                    // UI更新
+                    previewCanvas.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    exportBtn.disabled = false;
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
         }
-      }
 
-      // 3. CanvasからPNG形式のData URLを取得
-      // hiddenCanvasExportのサイズは400x480なので、そのまま高解像度画像が出力される
-      const dataUrl = hiddenCanvasExport.toDataURL('image/png');
+        // エクスポートボタンの処理
+        exportBtn.addEventListener('click', () => {
+            // 透過PNGとしてデータを取得
+            const dataURL = exportCanvas.toDataURL('image/png');
+            
+            // ダウンロードリンク生成
+            const link = document.createElement('a');
+            link.download = 'ukmr_dot_export.png';
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
 
-      // 4. ダウンロードリンクを作成し、ダウンロードをトリガー
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = 'UKMR_dot_art_400x480.png';
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      showMessage('ドット絵を「UKMR_dot_art_400x480.png」としてエクスポートしました。', 'success');
-
-    } catch (e) {
-      console.error('エクスポートエラー:', e);
-      showMessage('エクスポート中に予期せぬエラーが発生しました。コンソールを確認してください。', 'error');
-    }
-  }
-
-  /**
-   * 初期ロード時のドット絵グリッドの初期化
-   */
-  function initializeGrid() {
-    dotArtGrid.innerHTML = '';
-    // グリッドのセルを透明な状態で埋めて、初期のレイアウトを確保
-    for (let i = 0; i < DOT_WIDTH * DOT_HEIGHT; i++) {
-      const pixelEl = document.createElement('div');
-      pixelEl.className = 'pixel';
-      pixelEl.style.backgroundColor = 'transparent'; // 透明な背景
-      dotArtGrid.appendChild(pixelEl);
-    }
-    // 初回メッセージ
-    showMessage('PNG画像をアップロードして、40x48ドット絵に変換できます。', 'info');
-    exportButton.disabled = true;
-  }
-  
-  // ページロード時にグリッドを初期化
-  window.onload = initializeGrid;
-</script>
-
+    </script>
 </body>
+</html>
